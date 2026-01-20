@@ -1,35 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import './App.css';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import DepartmentSection from './components/DepartmentSection';
+import { departments } from './data/employees';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <Header />
+      <main style={styles.main}>
+        <div style={styles.container}>
+          {departments.map((department, index) => (
+            <DepartmentSection 
+              key={index} 
+              department={department} 
+            />
+          ))}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
-export default App
+const styles = {
+  main: {
+    minHeight: 'calc(100vh - 200px)',
+    backgroundColor: '#443e96',
+    padding: '2rem 0',
+  } as React.CSSProperties,
+  container: {
+    maxWidth: '26000 px',
+    margin: '1 auto',
+    padding: '0 1rem',
+  } as React.CSSProperties,
+};
+
+export default App;
