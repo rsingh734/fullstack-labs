@@ -1,11 +1,32 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import DepartmentSection from './components/DepartmentSection';
-import { departments } from './data/employees';
+import { departments as initialDepartments } from './data/employees';
+import type { Department } from './types';
+import AddEmployeeForm from './components/AddEmployeeForm';
 
 function App() {
+  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
+
+  function handleAddEmployee(firstName: string, departmentName: string) {
+
+    const updatedDepartments = departments.map((dep) => {
+
+      if (dep.name === departmentName) {
+        return {
+          ...dep,
+          employees: [...dep.employees, { firstName }]
+        };
+      }
+
+      return dep;
+    });
+
+    setDepartments(updatedDepartments);
+  }
+
   return (
     <div className="App">
       <Header />
@@ -19,6 +40,11 @@ function App() {
           ))}
         </div>
       </main>
+      {/* Add Employee Form goes here */}
+    <AddEmployeeForm
+      departments={departments}
+      onAddEmployee={handleAddEmployee}
+    />
       <Footer />
     </div>
   );
