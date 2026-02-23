@@ -5,30 +5,18 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import DepartmentSection from './components/DepartmentSection';
 import Organization from "./components/Organization";
-import { departments as initialDepartments } from './data/employees';
 import { organizationRoles } from "./data/organization";
-import type { Department } from './types';
 import AddEmployeeForm from './components/AddEmployeeForm';
+import type { Department } from "./types";
+import { employeeRepo } from "./repositories/employeeRepo";
 
 function App() {
-  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
+  const repo = employeeRepo();
+const [departments, setDepartments] = useState<Department[]>(repo.getDepartments());
 
-  function handleAddEmployee(firstName: string, departmentName: string) {
-
-    const updatedDepartments = departments.map((dep) => {
-
-      if (dep.name === departmentName) {
-        return {
-          ...dep,
-          employees: [...dep.employees, { firstName }]
-        };
-      }
-
-      return dep;
-    });
-
-    setDepartments(updatedDepartments);
-  }
+  function handleDepartmentsUpdated(next: Department[]) {
+  setDepartments(next);
+}
 
   return (
     <Router>
@@ -49,9 +37,9 @@ function App() {
                   ))}
                 </div>
                 <AddEmployeeForm
-                  departments={departments}
-                  onAddEmployee={handleAddEmployee}
-                />
+  departments={departments}
+  onDepartmentsUpdated={handleDepartmentsUpdated}
+/>
               </>
             }
           />
