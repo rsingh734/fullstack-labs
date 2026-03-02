@@ -1,5 +1,6 @@
 import React from "react";
-import type { Role } from "../data/organization";
+import type { Role } from "../types";
+import "./Organization.css";
 
 interface OrganizationProps {
   roles: Role[];
@@ -7,42 +8,21 @@ interface OrganizationProps {
 
 const Organization: React.FC<OrganizationProps> = ({ roles }) => {
   return (
-    <section style={styles.section}>
+    <section className="org-section">
       <h2>Leadership and Management</h2>
-      <div style={styles.list}>
+
+      <div className="org-list">
         {roles.map((role, index) => (
-          <div key={index} style={styles.row}>
-            <span>{role.firstName} {role.lastName}</span>
-            <span style={styles.role}>{role.role}</span>
+          <div key={index} className="org-row">
+            <span>
+              {role.firstName} {role.lastName}
+            </span>
+            <span className="org-role">{role.role}</span>
           </div>
         ))}
       </div>
     </section>
   );
-};
-
-const styles = {
-  section: {
-    backgroundColor: "black",
-    padding: "1.5rem",
-    borderRadius: "8px",
-    maxWidth: "600px",
-    margin: "2rem auto",
-  } as React.CSSProperties,
-  list: {
-    display: "flex",
-    flexDirection: "column" as const,
-    gap: "0.8rem",
-  },
-  row: {
-    display: "flex",
-    justifyContent: "space-between",
-    borderBottom: "1px solid #f5eeee",
-    paddingBottom: "0.5rem",
-  },
-  role: {
-    fontWeight: "bold",
-  },
 };
 
 export default Organization;

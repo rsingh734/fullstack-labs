@@ -1,0 +1,24 @@
+.org-section {
+  background-color: black;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.org-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.org-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f5eeee;
+  padding-bottom: 0.5rem;
+}
+
+.org-role {
+  font-weight: bold;
+}
