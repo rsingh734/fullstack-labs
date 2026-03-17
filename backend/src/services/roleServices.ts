@@ -1,5 +1,5 @@
 import type { Role } from "../types";
-import { organizationRepo } from "../repositories/organizationRepo";
+import type { OrganizationRepository } from "../repositories/organizationRepository";
 
 export type CreateRoleInput = {
   firstName: string;
@@ -14,11 +14,13 @@ export type CreateRoleResult =
       fieldErrors: Partial<Record<keyof CreateRoleInput, string[]>>;
     };
 
-export function roleService() {
-  const repo = organizationRepo();
-
+export function roleService(repo: OrganizationRepository) {
   return {
-    async createRole(input: CreateRoleInput): Promise<CreateRoleResult> {
+    getRoles(): Role[] {
+      return repo.getRoles();
+    },
+
+    createRole(input: CreateRoleInput): CreateRoleResult {
       const fieldErrors: Partial<Record<keyof CreateRoleInput, string[]>> = {};
 
       if (!input.firstName || input.firstName.trim().length < 3) {
@@ -27,28 +29,23 @@ export function roleService() {
 
       if (!input.role || input.role.trim().length === 0) {
         fieldErrors.role = ["Role is required."];
+      } else if (repo.roleIsOccupied(input.role)) {
+        fieldErrors.role = ["That role already exists and is occupied."];
       }
 
       if (Object.keys(fieldErrors).length > 0) {
         return { ok: false, fieldErrors };
       }
 
-      try {
-        const roles = await repo.createRole({
-          firstName: input.firstName.trim(),
-          lastName: input.lastName?.trim() || undefined,
-          role: input.role.trim(),
-        });
+      const newRole: Role = {
+        firstName: input.firstName.trim(),
+        lastName: input.lastName?.trim() || undefined,
+        role: input.role.trim(),
+      };
 
-        return { ok: true, roles };
-      } catch (error: any) {
-        return {
-          ok: false,
-          fieldErrors: error.fieldErrors || {
-            role: ["Unable to create role."],
-          },
-        };
-      }
+      const roles = repo.createRole(newRole);
+
+      return { ok: true, roles };
     },
   };
 }

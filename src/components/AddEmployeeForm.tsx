@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import type { Department } from "../types";
 import { useFormInput } from "../hooks/useFormInput";
-import { employeeRepo } from "../repositories/employeeRepo";
 import { employeeService } from "../services/employeeService";
 
 interface Props {
@@ -9,27 +8,33 @@ interface Props {
   onDepartmentsUpdated: (departments: Department[]) => void;
 }
 
-export default function AddEmployeeForm({ departments, onDepartmentsUpdated }: Props) {
-  const repo = useMemo(() => employeeRepo(), []);
-  const service = useMemo(() => employeeService(repo), [repo]);
+export default function AddEmployeeForm({
+  departments,
+  onDepartmentsUpdated,
+}: Props) {
+  const service = useMemo(() => employeeService(), []);
 
   const firstName = useFormInput("");
   const departmentName = useFormInput("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     firstName.clearMessages();
     departmentName.clearMessages();
 
-    const result = service.createEmployee({
+    const result = await service.createEmployee({
       firstName: firstName.value,
       departmentName: departmentName.value,
     });
 
     if (!result.ok) {
-      if (result.fieldErrors.firstName) firstName.setMessages(result.fieldErrors.firstName);
-      if (result.fieldErrors.departmentName) departmentName.setMessages(result.fieldErrors.departmentName);
+      if (result.fieldErrors.firstName) {
+        firstName.setMessages(result.fieldErrors.firstName);
+      }
+      if (result.fieldErrors.departmentName) {
+        departmentName.setMessages(result.fieldErrors.departmentName);
+      }
       return;
     }
 
@@ -45,15 +50,24 @@ export default function AddEmployeeForm({ departments, onDepartmentsUpdated }: P
 
       <div>
         <label>First Name:</label>
-        <input type="text" value={firstName.value} onChange={firstName.onChange} />
+        <input
+          type="text"
+          value={firstName.value}
+          onChange={firstName.onChange}
+        />
         {firstName.messages.map((m, i) => (
-          <p key={i} style={{ color: "red" }}>{m}</p>
+          <p key={i} style={{ color: "red" }}>
+            {m}
+          </p>
         ))}
       </div>
 
       <div>
         <label>Department:</label>
-        <select value={departmentName.value} onChange={departmentName.onChange}>
+        <select
+          value={departmentName.value}
+          onChange={departmentName.onChange}
+        >
           <option value="">Select Department</option>
           {departments.map((dep) => (
             <option key={dep.name} value={dep.name}>
@@ -62,7 +76,9 @@ export default function AddEmployeeForm({ departments, onDepartmentsUpdated }: P
           ))}
         </select>
         {departmentName.messages.map((m, i) => (
-          <p key={i} style={{ color: "red" }}>{m}</p>
+          <p key={i} style={{ color: "red" }}>
+            {m}
+          </p>
         ))}
       </div>
 

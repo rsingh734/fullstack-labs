@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 import "./App.css";
 
@@ -12,12 +12,20 @@ import AddEmployeeForm from "./components/AddEmployeeForm";
 import AddRoleForm from "./components/AddRoleForm";
 
 import { organizationRepo } from "./repositories/organizationRepo";
+import { employeeRepo } from "./repositories/employeeRepo";
 
 export default function App() {
-  const repo = useMemo(() => organizationRepo(), []);
+  const orgRepo = useMemo(() => organizationRepo(), []);
+  const empRepo = useMemo(() => employeeRepo(), []);
 
-  const [departments, setDepartments] = useState<Department[]>(repo.getDepartments());
-  const [roles, setRoles] = useState<Role[]>(repo.getRoles());
+  const [departments, setDepartments] = useState<Department[]>([]);
+  useEffect(() => {
+  empRepo.getDepartments().then(setDepartments);
+}, [empRepo]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  useEffect(() => {
+  orgRepo.getRoles().then(setRoles);
+}, [orgRepo]);
 
   return (
     <Router>

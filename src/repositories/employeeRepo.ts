@@ -1,31 +1,36 @@
 import type { Department, Employee } from "../types";
-import { departments as seedDepartments } from "../data/employees";
 
-let departmentsStore: Department[] = JSON.parse(JSON.stringify(seedDepartments));
+const API_BASE = "http://localhost:5000/api";
 
 export function employeeRepo() {
   return {
-    getDepartments(): Department[] {
-      return JSON.parse(JSON.stringify(departmentsStore));
+    async getDepartments(): Promise<Department[]> {
+      const res = await fetch(`${API_BASE}/departments`);
+      return res.json();
     },
 
-    departmentExists(departmentName: string): boolean {
-      return departmentsStore.some((d) => d.name === departmentName);
-    },
-
-    createEmployee(departmentName: string, employee: Employee): Department[] {
-      departmentsStore = departmentsStore.map((dep) => {
-        if (dep.name !== departmentName) return dep;
-
-        return {
-          ...dep,
-          employees: [...dep.employees, employee],
-        };
+    async createEmployee(
+      departmentName: string,
+      employee: Employee
+    ): Promise<Department[]> {
+      const res = await fetch(`${API_BASE}/employees`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          departmentName,
+          ...employee,
+        }),
       });
 
-      return JSON.parse(JSON.stringify(departmentsStore));
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw data;
+      }
+
+      return data.departments;
     },
   };
 }
-
-export type EmployeeRepo = ReturnType<typeof employeeRepo>;
