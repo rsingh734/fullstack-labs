@@ -1,54 +1,30 @@
-import type { Department, Employee, Role } from "../types";
-import { departments as seedDepartments } from "../data/employees";
-import { organizationRoles as seedRoles } from "../data/organization";
+import type { Role } from "../types";
 
-let departmentsStore: Department[] = JSON.parse(JSON.stringify(seedDepartments));
-let rolesStore: Role[] = JSON.parse(JSON.stringify(seedRoles));
-
-function deepCopy<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value));
-}
+const API_BASE = "http://localhost:5000/api";
 
 export function organizationRepo() {
   return {
-    getDepartments(): Department[] {
-      return deepCopy(departmentsStore);
+    async getRoles(): Promise<Role[]> {
+      const res = await fetch(`${API_BASE}/roles`);
+      return res.json();
     },
 
-    departmentExists(departmentName: string): boolean {
-      return departmentsStore.some((d) => d.name === departmentName);
-    },
-
-    createEmployee(departmentName: string, employee: Employee): Department[] {
-      departmentsStore = departmentsStore.map((dep) => {
-        if (dep.name !== departmentName) return dep;
-        return { ...dep, employees: [...dep.employees, employee] };
+    async createRole(role: Role): Promise<Role[]> {
+      const res = await fetch(`${API_BASE}/roles`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(role),
       });
-      return deepCopy(departmentsStore);
-    },
 
-    getRoles(): Role[] {
-      return deepCopy(rolesStore);
-    },
+      const data = await res.json();
 
-    roleIsOccupied(roleName: string): boolean {
-      const normalized = roleName.trim().toLowerCase();
-      return rolesStore.some((r) => r.role.trim().toLowerCase() === normalized);
-    },
+      if (!res.ok) {
+        throw data;
+      }
 
-    createRole(role: Role): Role[] {
-      rolesStore = [...rolesStore, role];
-      return deepCopy(rolesStore);
-    },
-
-    deleteRole(roleName: string): Role[] {
-      const normalized = roleName.trim().toLowerCase();
-      rolesStore = rolesStore.filter(
-        (r) => r.role.trim().toLowerCase() !== normalized
-      );
-      return deepCopy(rolesStore);
+      return data.roles;
     },
   };
 }
-
-export type OrganizationRepo = ReturnType<typeof organizationRepo>;
