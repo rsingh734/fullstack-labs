@@ -1,6 +1,6 @@
 import type { Role } from "../types";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export function organizationRepo() {
   return {
