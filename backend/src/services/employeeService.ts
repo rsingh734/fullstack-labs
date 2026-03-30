@@ -16,15 +16,20 @@ export type CreateEmployeeResult =
 
 export function employeeService(repo: OrganizationRepository) {
   return {
-    getDepartments(): Department[] {
+    async getDepartments(): Promise<Department[]> {
       return repo.getDepartments();
     },
 
-    createEmployee(input: CreateEmployeeInput): CreateEmployeeResult {
+    async createEmployee(
+      input: CreateEmployeeInput
+    ): Promise<CreateEmployeeResult> {
       const fieldErrors: Partial<Record<keyof CreateEmployeeInput, string[]>> =
         {};
 
-      if (!input.departmentName || !repo.departmentExists(input.departmentName)) {
+      if (
+        !input.departmentName ||
+        !(await repo.departmentExists(input.departmentName))
+      ) {
         fieldErrors.departmentName = ["Please select a valid department."];
       }
 
@@ -41,7 +46,10 @@ export function employeeService(repo: OrganizationRepository) {
         lastName: input.lastName?.trim() || undefined,
       };
 
-      const departments = repo.createEmployee(input.departmentName, employee);
+      const departments = await repo.createEmployee(
+        input.departmentName,
+        employee
+      );
 
       return { ok: true, departments };
     },

@@ -16,11 +16,11 @@ export type CreateRoleResult =
 
 export function roleService(repo: OrganizationRepository) {
   return {
-    getRoles(): Role[] {
+    async getRoles(): Promise<Role[]> {
       return repo.getRoles();
     },
 
-    createRole(input: CreateRoleInput): CreateRoleResult {
+    async createRole(input: CreateRoleInput): Promise<CreateRoleResult> {
       const fieldErrors: Partial<Record<keyof CreateRoleInput, string[]>> = {};
 
       if (!input.firstName || input.firstName.trim().length < 3) {
@@ -29,7 +29,7 @@ export function roleService(repo: OrganizationRepository) {
 
       if (!input.role || input.role.trim().length === 0) {
         fieldErrors.role = ["Role is required."];
-      } else if (repo.roleIsOccupied(input.role)) {
+      } else if (await repo.roleIsOccupied(input.role.trim())) {
         fieldErrors.role = ["That role already exists and is occupied."];
       }
 
@@ -43,7 +43,7 @@ export function roleService(repo: OrganizationRepository) {
         role: input.role.trim(),
       };
 
-      const roles = repo.createRole(newRole);
+      const roles = await repo.createRole(newRole);
 
       return { ok: true, roles };
     },

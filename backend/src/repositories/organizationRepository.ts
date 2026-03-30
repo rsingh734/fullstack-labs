@@ -1,52 +1,128 @@
+import { prisma } from "../lib/prisma";
 import type { Department, Employee, Role } from "../types";
-import { departments as seedDepartments } from "../data/employee";
-import { organizationRoles as seedRoles } from "../data/organization";
 
-let departmentsStore: Department[] = JSON.parse(JSON.stringify(seedDepartments));
-let rolesStore: Role[] = JSON.parse(JSON.stringify(seedRoles));
+function mapDepartment(department: {
+  id: number;
+  name: string;
+  employees: { id: number; firstName: string; lastName: string | null }[];
+}): Department {
+  return {
+    name: department.name,
+    employees: department.employees.map((employee) => ({
+      firstName: employee.firstName,
+      lastName: employee.lastName ?? undefined,
+    })),
+  };
+}
 
-function deepCopy<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value));
+function mapRole(role: {
+  id: number;
+  firstName: string;
+  lastName: string | null;
+  role: string;
+}): Role {
+  return {
+    firstName: role.firstName,
+    lastName: role.lastName ?? undefined,
+    role: role.role,
+  };
 }
 
 export function organizationRepository() {
   return {
-    getDepartments(): Department[] {
-      return deepCopy(departmentsStore);
-    },
-
-    departmentExists(departmentName: string): boolean {
-      return departmentsStore.some((d) => d.name === departmentName);
-    },
-
-    createEmployee(departmentName: string, employee: Employee): Department[] {
-      departmentsStore = departmentsStore.map((department) => {
-        if (department.name !== departmentName) return department;
-
-        return {
-          ...department,
-          employees: [...department.employees, employee],
-        };
+    async getDepartments(): Promise<Department[]> {
+      const departments = await prisma.department.findMany({
+        include: {
+          employees: true,
+        },
+        orderBy: {
+          name: "asc",
+        },
       });
 
-      return deepCopy(departmentsStore);
+      return departments.map(mapDepartment);
     },
 
-    getRoles(): Role[] {
-      return deepCopy(rolesStore);
+    async departmentExists(departmentName: string): Promise<boolean> {
+      const department = await prisma.department.findUnique({
+        where: {
+          name: departmentName,
+        },
+      });
+
+      return !!department;
     },
 
-    roleIsOccupied(roleName: string): boolean {
-      const normalizedRole = roleName.trim().toLowerCase();
+    async createEmployee(
+      departmentName: string,
+      employee: Employee
+    ): Promise<Department[]> {
+      const department = await prisma.department.findUnique({
+        where: {
+          name: departmentName,
+        },
+      });
 
-      return rolesStore.some(
-        (role) => role.role.trim().toLowerCase() === normalizedRole
-      );
+      if (!department) {
+        throw new Error("Department not found.");
+      }
+
+      await prisma.employee.create({
+        data: {
+          firstName: employee.firstName,
+          lastName: employee.lastName,
+          departmentId: department.id,
+        },
+      });
+
+      const updatedDepartments = await prisma.department.findMany({
+        include: {
+          employees: true,
+        },
+        orderBy: {
+          name: "asc",
+        },
+      });
+
+      return updatedDepartments.map(mapDepartment);
     },
 
-    createRole(role: Role): Role[] {
-      rolesStore = [...rolesStore, role];
-      return deepCopy(rolesStore);
+    async getRoles(): Promise<Role[]> {
+      const roles = await prisma.role.findMany({
+        orderBy: {
+          role: "asc",
+        },
+      });
+
+      return roles.map(mapRole);
+    },
+
+    async roleIsOccupied(roleName: string): Promise<boolean> {
+      const role = await prisma.role.findUnique({
+        where: {
+          role: roleName,
+        },
+      });
+
+      return !!role;
+    },
+
+    async createRole(role: Role): Promise<Role[]> {
+      await prisma.role.create({
+        data: {
+          firstName: role.firstName,
+          lastName: role.lastName,
+          role: role.role,
+        },
+      });
+
+      const updatedRoles = await prisma.role.findMany({
+        orderBy: {
+          role: "asc",
+        },
+      });
+
+      return updatedRoles.map(mapRole);
     },
   };
 }
