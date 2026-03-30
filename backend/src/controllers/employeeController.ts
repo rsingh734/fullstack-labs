@@ -5,13 +5,13 @@ import { employeeService } from "../services/employeeService";
 const repo = organizationRepository();
 const service = employeeService(repo);
 
-export function getDepartmentsController(_req: Request, res: Response) {
-  const departments = service.getDepartments();
+export async function getDepartmentsController(_req: Request, res: Response) {
+  const departments = await service.getDepartments();
   res.status(200).json(departments);
 }
 
-export function createEmployeeController(req: Request, res: Response) {
-  const result = service.createEmployee(req.body);
+export async function createEmployeeController(req: Request, res: Response) {
+  const result = await service.createEmployee(req.body);
 
   if (!result.ok) {
     return res.status(400).json(result);
