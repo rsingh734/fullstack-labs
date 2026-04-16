@@ -1,5 +1,17 @@
 import { useMemo, useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate,
+} from "react-router-dom";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 import "./App.css";
 
 import type { Department, Role } from "./types";
@@ -19,13 +31,15 @@ export default function App() {
   const empRepo = useMemo(() => employeeRepo(), []);
 
   const [departments, setDepartments] = useState<Department[]>([]);
-  useEffect(() => {
-  empRepo.getDepartments().then(setDepartments);
-}, [empRepo]);
   const [roles, setRoles] = useState<Role[]>([]);
+
   useEffect(() => {
-  orgRepo.getRoles().then(setRoles);
-}, [orgRepo]);
+    empRepo.getDepartments().then(setDepartments);
+  }, [empRepo]);
+
+  useEffect(() => {
+    orgRepo.getRoles().then(setRoles);
+  }, [orgRepo]);
 
   return (
     <Router>
@@ -35,9 +49,20 @@ export default function App() {
         <Link className="navlink" to="/employees">
           Employees
         </Link>
+
         <Link className="navlink" to="/organization">
           Organization
         </Link>
+
+        <div style={{ marginLeft: "auto" }}>
+          <SignedOut>
+            <SignInButton />
+          </SignedOut>
+
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </div>
       </nav>
 
       <main className="main">
@@ -50,14 +75,25 @@ export default function App() {
               <div className="page">
                 <div className="container">
                   {departments.map((department, index) => (
-                    <DepartmentSection key={index} department={department} />
+                    <DepartmentSection
+                      key={index}
+                      department={department}
+                    />
                   ))}
                 </div>
 
-                <AddEmployeeForm
-                  departments={departments}
-                  onDepartmentsUpdated={setDepartments}
-                />
+                <SignedIn>
+                  <AddEmployeeForm
+                    departments={departments}
+                    onDepartmentsUpdated={setDepartments}
+                  />
+                </SignedIn>
+
+                <SignedOut>
+                  <p style={{ textAlign: "center", marginTop: "20px" }}>
+                    Please sign in to add employees
+                  </p>
+                </SignedOut>
               </div>
             }
           />
@@ -68,7 +104,15 @@ export default function App() {
               <div className="page">
                 <Organization roles={roles} />
 
-                <AddRoleForm onRolesUpdated={setRoles} />
+                <SignedIn>
+                  <AddRoleForm onRolesUpdated={setRoles} />
+                </SignedIn>
+
+                <SignedOut>
+                  <p style={{ textAlign: "center", marginTop: "20px" }}>
+                    Please sign in to add roles
+                  </p>
+                </SignedOut>
               </div>
             }
           />
