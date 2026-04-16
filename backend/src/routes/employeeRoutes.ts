@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   getDepartmentsController,
   createEmployeeController,
-} from "../controllers/employeecontroller";
+} from "../controllers/employeeController";
 
 const router = Router();
 
