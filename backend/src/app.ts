@@ -8,7 +8,10 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173"
+  origin:  [
+    "http://localhost:5173",
+    "https://fullstack-labs-4lq4.vercel.app"
+  ]
 }));
 
 app.use(express.json());
