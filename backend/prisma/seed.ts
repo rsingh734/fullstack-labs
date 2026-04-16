@@ -159,12 +159,12 @@ async function main() {
     { firstName: "Tim", lastName: "Morrison", role: "Manager, Data Center and Hosting Services" },
     { firstName: "Aleksandr", lastName: "Milosevic", role: "Manager of IT Risk Management" },
     { firstName: "Jim", lastName: "Wingnut", role: "Manager IT, project management office" },
-    { firstName: "Vacant", role: "Left Vacant" },
-    { firstName: "Vacant", role: "Left Vacant" },
-    { firstName: "Vacant", role: "Left Vacant" },
-    { firstName: "Vacant", role: "Left Vacant" },
-    { firstName: "Vacant", role: "Left Vacant" },
-    { firstName: "Vacant", role: "Left Vacant" },
+    { firstName: "Vacant", role: "Left Vacant 1" },
+    { firstName: "Vacant", role: "Left Vacant 2" },
+    { firstName: "Vacant", role: "Left Vacant 3" },
+    { firstName: "Vacant", role: "Left Vacant 4" },
+    { firstName: "Vacant", role: "Left Vacant 5" },
+    { firstName: "Vacant", role: "Left Vacant 6" },
   ];
 
   for (const role of rolesData) {
