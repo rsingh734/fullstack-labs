@@ -14,5 +14,5 @@ AddEmployeeForm invalidates queries on success.
 Backend APIs now paginated for prod data. Pairs with Clerk auth; extend to 
 mutations/infinite.
 
-Test: npm run dev frontend/backend. /employees paginate/add → refetch.
+
 
