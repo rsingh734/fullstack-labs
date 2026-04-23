@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,9 +12,10 @@ import {
   SignInButton,
   UserButton,
 } from "@clerk/clerk-react";
+import { useQuery } from "@tanstack/react-query";
 import "./App.css";
 
-import type { Department, Role } from "./types";
+import type { Department, DepartmentsResponse } from "./types";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -30,16 +31,18 @@ export default function App() {
   const orgRepo = useMemo(() => organizationRepo(), []);
   const empRepo = useMemo(() => employeeRepo(), []);
 
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [page, setPage] = useState(1);
+  const { data: departmentsData, isLoading } = useQuery<DepartmentsResponse>({
+    queryKey: ["departments", page],
+    queryFn: () => empRepo.getDepartments(page),
+  });
+  const departments: Department[] = departmentsData?.departments || [];
+  const totalPages = Math.ceil((departmentsData?.total || 0) / 5) || 1;
 
-  useEffect(() => {
-    empRepo.getDepartments().then(setDepartments);
-  }, [empRepo]);
-
-  useEffect(() => {
-    orgRepo.getRoles().then(setRoles);
-  }, [orgRepo]);
+  const { data: roles = [] } = useQuery({
+    queryKey: ["roles"],
+    queryFn: () => orgRepo.getRoles(),
+  });
 
   return (
     <Router>
@@ -74,18 +77,40 @@ export default function App() {
             element={
               <div className="page">
                 <div className="container">
-                  {departments.map((department, index) => (
-                    <DepartmentSection
-                      key={index}
-                      department={department}
-                    />
-                  ))}
+                  {isLoading ? (
+                    <p>Loading departments...</p>
+                  ) : (
+                    departments.map((department: Department, index: number) => (
+                      <DepartmentSection
+                        key={index}
+                        department={department}
+                      />
+                    ))
+                  )}
                 </div>
-
+                {totalPages > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+                    <button 
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      style={{ padding: '8px 16px', opacity: page === 1 ? 0.5 : 1, cursor: page === 1 ? 'not-allowed' : 'pointer' }}
+                    >
+                      Previous
+                    </button>
+                    <span>Page {page} of {totalPages}</span>
+                    <button 
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      style={{ padding: '8px 16px', opacity: page === totalPages ? 0.5 : 1, cursor: page === totalPages ? 'not-allowed' : 'pointer' }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
                 <SignedIn>
                   <AddEmployeeForm
                     departments={departments}
-                    onDepartmentsUpdated={setDepartments}
+                    onDepartmentsUpdated={() => {}}
                   />
                 </SignedIn>
 
@@ -105,7 +130,7 @@ export default function App() {
                 <Organization roles={roles} />
 
                 <SignedIn>
-                  <AddRoleForm onRolesUpdated={setRoles} />
+                  <AddRoleForm onRolesUpdated={() => {}} />
                 </SignedIn>
 
                 <SignedOut>

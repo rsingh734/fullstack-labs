@@ -8,6 +8,13 @@ export interface Department {
   employees: Employee[];
 }
 
+export interface DepartmentsResponse {
+  departments: Department[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface Role {
   firstName: string;
   lastName?: string;
