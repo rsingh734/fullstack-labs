@@ -16,8 +16,8 @@ export type CreateEmployeeResult =
 
 export function employeeService(repo: OrganizationRepository) {
   return {
-    async getDepartments(): Promise<Department[]> {
-      return repo.getDepartments();
+async getDepartments(page: number = 1, limit: number = 5): Promise<{departments: Department[], total: number, page: number, limit: number}> {
+      return repo.getDepartments(page, limit);
     },
 
     async createEmployee(
