@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Department } from "../types";
 import { useFormInput } from "../hooks/useFormInput";
 import { employeeService } from "../services/employeeService";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
   departments: Department[];
@@ -10,9 +11,9 @@ interface Props {
 
 export default function AddEmployeeForm({
   departments,
-  onDepartmentsUpdated,
 }: Props) {
   const service = useMemo(() => employeeService(), []);
+  const queryClient = useQueryClient();
 
   const firstName = useFormInput("");
   const departmentName = useFormInput("");
@@ -38,7 +39,8 @@ export default function AddEmployeeForm({
       return;
     }
 
-    onDepartmentsUpdated(result.departments);
+    // Invalidate departments query to refetch
+    queryClient.invalidateQueries({ queryKey: ['departments'] });
 
     firstName.setValue("");
     departmentName.setValue("");

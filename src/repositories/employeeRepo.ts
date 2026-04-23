@@ -1,11 +1,13 @@
-import type { Department, Employee } from "../types";
+import type { Department, Employee, DepartmentsResponse } from "../types";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 export function employeeRepo() {
   return {
-    async getDepartments(): Promise<Department[]> {
-      const res = await fetch(`${API_BASE}/departments`);
+async getDepartments(page: number = 1, limit: number = 5): Promise<DepartmentsResponse> {
+      const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+      const res = await fetch(`${API_BASE}/departments?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
 

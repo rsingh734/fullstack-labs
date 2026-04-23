@@ -30,17 +30,28 @@ function mapRole(role: {
 
 export function organizationRepository() {
   return {
-    async getDepartments(): Promise<Department[]> {
-      const departments = await prisma.department.findMany({
-        include: {
-          employees: true,
-        },
-        orderBy: {
-          name: "asc",
-        },
-      });
+async getDepartments(page: number = 1, limit: number = 5): Promise<{departments: Department[], total: number, page: number, limit: number}> {
+      const skip = (page - 1) * limit;
+      const [departments, total] = await Promise.all([
+        prisma.department.findMany({
+          skip,
+          take: limit,
+          include: {
+            employees: true,
+          },
+          orderBy: {
+            name: "asc",
+          },
+        }),
+        prisma.department.count()
+      ]);
 
-      return departments.map(mapDepartment);
+      return {
+        departments: departments.map(mapDepartment),
+        total,
+        page,
+        limit
+      };
     },
 
     async departmentExists(departmentName: string): Promise<boolean> {

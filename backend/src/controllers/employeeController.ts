@@ -5,9 +5,11 @@ import { employeeService } from "../services/employeeService";
 const repo = organizationRepository();
 const service = employeeService(repo);
 
-export async function getDepartmentsController(_req: Request, res: Response) {
-  const departments = await service.getDepartments();
-  res.status(200).json(departments);
+export async function getDepartmentsController(req: Request, res: Response) {
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 5;
+  const result = await service.getDepartments(page, limit);
+  res.status(200).json(result);
 }
 
 export async function createEmployeeController(req: Request, res: Response) {
